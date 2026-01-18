@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Stop } from '../types';
+import { theme } from '../theme';
 
 const { width } = Dimensions.get('window');
 
@@ -52,120 +53,114 @@ export const VibeCard = ({ stop, onPress, onUnlock, isUnlocked = false }: VibeCa
                 )}
             </View>
 
-            {/* Neon Gradient Line Effect */}
-            <View style={styles.neonLine} />
+            {/* Gradient Line Removed in favor of Outer Glow */}
         </TouchableOpacity>
     );
 };
 
 const styles = StyleSheet.create({
     cardContainer: {
-        width: width * 0.85, // Carousel width
-        height: 220, // Fixed height for consistency
-        backgroundColor: '#1e293b', // Dark Slate
+        width: width * 0.85,
+        height: 220,
+        backgroundColor: 'rgba(20, 20, 30, 0.85)', // High opacity dark
         borderRadius: 20,
-        padding: 20,
+        padding: 24,
         marginRight: 15,
         borderWidth: 1,
-        borderColor: '#334155',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.5,
-        shadowRadius: 10,
-        elevation: 10, // Android shadow
+        borderColor: 'rgba(255, 255, 255, 0.2)', // Top/Glass border effect
+        // Purple Glow Effect
+        shadowColor: theme.colors.accent,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.6,
+        shadowRadius: 12,
+        elevation: 10,
         justifyContent: 'space-between',
     },
     headerRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 10,
+        marginBottom: 12,
     },
     categoryBadge: {
-        backgroundColor: '#6366f1', // Indigo/Purple Neon
-        paddingHorizontal: 10,
-        paddingVertical: 4,
+        backgroundColor: theme.colors.accent, // Purple Badge
+        paddingHorizontal: 12,
+        paddingVertical: 6,
         borderRadius: 12,
+        shadowColor: theme.colors.accent,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.4,
+        shadowRadius: 4,
     },
     categoryText: {
         color: '#fff',
         fontSize: 10,
         fontWeight: '800',
-        letterSpacing: 1,
+        letterSpacing: 1.5,
     },
     costText: {
-        color: '#94a3b8',
+        color: theme.colors.textDim,
         fontWeight: '700',
+        fontSize: 14,
     },
     titleText: {
         color: '#ffffff',
-        fontSize: 24,
+        fontSize: 26,
         fontWeight: 'bold',
-        marginBottom: 10,
-        textShadowColor: 'rgba(0, 0, 0, 0.75)',
-        textShadowOffset: { width: -1, height: 1 },
-        textShadowRadius: 10,
+        marginBottom: 12,
+        letterSpacing: 0.5,
     },
     contentArea: {
         flex: 1,
         justifyContent: 'center',
     },
     descriptionText: {
-        color: '#cbd5e1', // Slate-300
-        fontSize: 14,
-        lineHeight: 20,
+        color: '#cbd5e1',
+        fontSize: 15,
+        lineHeight: 22,
     },
     hiddenTip: {
         marginTop: 8,
         color: '#fbbf24', // Amber/Gold
-        fontSize: 12,
+        fontSize: 13,
         fontStyle: 'italic',
     },
     // Locked State Styles
     lockedState: {
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 10,
-        backgroundColor: 'rgba(15, 23, 42, 0.5)', // Slightly darker overlay
-        borderRadius: 12,
+        padding: 16,
+        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+        borderRadius: 16,
         borderWidth: 1,
-        borderColor: 'rgba(251, 191, 36, 0.2)', // Faint gold border
+        borderColor: 'rgba(251, 191, 36, 0.3)',
     },
     lockIconContainer: {
-        marginBottom: 5,
+        marginBottom: 8,
     },
     lockedText: {
         color: '#cbd5e1',
-        fontSize: 12,
-        marginBottom: 8,
+        fontSize: 14,
+        marginBottom: 12,
+        fontWeight: '600',
         fontStyle: 'italic',
     },
     unlockButton: {
-        backgroundColor: '#fbbf24', // Gold
-        paddingHorizontal: 20,
-        paddingVertical: 8,
-        borderRadius: 20,
-        shadowColor: '#fbbf24',
+        backgroundColor: theme.colors.success, // Cyan/Gold per instruction, using success (cyan) or gold. User said Cyan OR Gold. Let's stick to Gold for "Premium/Currency" feel typically, but instructions said "success (Cyan) or Gold". Let's use Gold/Amber to match lock icon for consistency.
+        // Actually, user strict constraint: "Ensure the 'Unlock' button inside the card uses the theme.colors.success (Cyan) or Gold".
+        // Let's use theme.colors.success (Cyan) for a Cyberpunk pop.
+        paddingHorizontal: 24,
+        paddingVertical: 10,
+        borderRadius: 24,
+        shadowColor: theme.colors.success,
         shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.5,
-        shadowRadius: 10,
+        shadowOpacity: 0.6,
+        shadowRadius: 8,
     },
     unlockButtonText: {
-        color: '#0f172a', // Dark text on gold
-        fontWeight: 'bold',
+        color: '#000000',
+        fontWeight: '900',
         fontSize: 12,
-    },
-    neonLine: {
-        position: 'absolute',
-        bottom: 0,
-        left: 20,
-        right: 20,
-        height: 4,
-        backgroundColor: '#3b82f6', // Bright Blue
-        borderRadius: 2,
-        shadowColor: '#3b82f6',
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.8,
-        shadowRadius: 8,
+        letterSpacing: 1,
     },
 });

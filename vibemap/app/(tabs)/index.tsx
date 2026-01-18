@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { RootState, AppDispatch } from '../../src/features/store';
 import { generateItinerary, resetTrip } from '../../src/features/chat/tripSlice';
 import ScreenWrapper from '../../src/components/ScreenWrapper';
+import { theme, glassStyles } from '../../src/theme';
 
 const TRENDING_VIBES = [
     '☕ Late Night Brew',
@@ -23,7 +24,6 @@ export default function ChatScreen() {
 
     useEffect(() => {
         if (status === 'success' && itinerary) {
-            // Navigate to the map screen with the generated trip's ID
             router.push(`/map/${itinerary._id}`);
         }
     }, [status, itinerary, router]);
@@ -35,8 +35,6 @@ export default function ChatScreen() {
     };
 
     const handleChipPress = (vibe: string) => {
-        // Remove emoji for cleaner prompt if desired, or keep it.
-        // Keeping it adds character.
         setPrompt(vibe);
     };
 
@@ -47,16 +45,18 @@ export default function ChatScreen() {
                 style={styles.container}
             >
                 <View style={styles.content}>
+                    <Text style={styles.brandTitle}>VIBEMAP</Text>
                     <Text style={styles.title}>What's the vibe today?</Text>
 
                     <TextInput
-                        style={styles.input}
+                        style={styles.glassInput}
                         placeholder="e.g., Moody jazz bar for a rainy night..."
-                        placeholderTextColor="#94a3b8"
+                        placeholderTextColor="#6B7280"
                         value={prompt}
                         onChangeText={setPrompt}
                         multiline
                         numberOfLines={3}
+                        selectionColor={theme.colors.accent}
                     />
 
                     {/* Trending Vibes Chips */}
@@ -88,6 +88,7 @@ export default function ChatScreen() {
                         style={[styles.button, status === 'loading' && styles.buttonDisabled]}
                         onPress={handleSubmit}
                         disabled={status === 'loading'}
+                        activeOpacity={0.8}
                     >
                         {status === 'loading' ? (
                             <View style={styles.loadingRow}>
@@ -95,7 +96,7 @@ export default function ChatScreen() {
                                 <Text style={styles.buttonText}>Waking up AI...</Text>
                             </View>
                         ) : (
-                            <Text style={styles.buttonText}>Generate Itinerary</Text>
+                            <Text style={styles.buttonText}>GENERATE ITINERARY</Text>
                         )}
                     </TouchableOpacity>
                 </View>
@@ -109,37 +110,52 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         paddingHorizontal: 20,
+        backgroundColor: theme.colors.background,
     },
     content: {
         width: '100%',
         alignItems: 'center',
     },
+    brandTitle: {
+        fontSize: 14,
+        fontWeight: '900',
+        color: theme.colors.accent,
+        marginBottom: 10,
+        letterSpacing: 3,
+        textTransform: 'uppercase',
+    },
     title: {
-        fontSize: 28,
+        fontSize: 32,
         fontWeight: 'bold',
         color: '#ffffff',
         marginBottom: 30,
         textAlign: 'center',
+        textShadowColor: theme.colors.primary,
+        textShadowOffset: { width: 0, height: 0 },
+        textShadowRadius: 10,
     },
-    input: {
+    glassInput: {
+        ...glassStyles(),
         width: '100%',
-        backgroundColor: '#1e293b', // slate-800
         color: '#ffffff',
-        padding: 15,
-        borderRadius: 12,
+        padding: 20,
+        borderRadius: 16,
         fontSize: 16,
-        borderWidth: 1,
-        borderColor: '#334155', // slate-700
-        marginBottom: 20,
-        minHeight: 100,
+        marginBottom: 30,
+        minHeight: 120,
         textAlignVertical: 'top',
     },
     button: {
         width: '100%',
-        backgroundColor: '#3b82f6', // blue-500
-        paddingVertical: 15,
+        backgroundColor: theme.colors.primary,
+        paddingVertical: 18,
         borderRadius: 12,
         alignItems: 'center',
+        shadowColor: theme.colors.primary,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.8,
+        shadowRadius: 15,
+        elevation: 8,
     },
     buttonDisabled: {
         opacity: 0.7,
@@ -147,22 +163,25 @@ const styles = StyleSheet.create({
     buttonText: {
         color: '#ffffff',
         fontSize: 16,
-        fontWeight: '600',
+        fontWeight: 'bold',
+        letterSpacing: 1,
+        textTransform: 'uppercase',
     },
     errorText: {
-        color: '#ef4444', // red-500
+        color: theme.colors.error,
         marginBottom: 15,
+        fontWeight: 'bold',
     },
     // Chips Styling
     chipsContainer: {
         width: '100%',
-        marginBottom: 25,
+        marginBottom: 30,
     },
     chipsLabel: {
-        color: '#94a3b8',
+        color: theme.colors.textDim,
         fontSize: 12,
         fontWeight: '600',
-        marginBottom: 10,
+        marginBottom: 12,
         marginLeft: 4,
         textTransform: 'uppercase',
         letterSpacing: 1,
@@ -171,16 +190,16 @@ const styles = StyleSheet.create({
         paddingRight: 20,
     },
     chip: {
-        backgroundColor: '#334155', // slate-700
+        backgroundColor: theme.colors.surface,
         paddingHorizontal: 16,
-        paddingVertical: 8,
+        paddingVertical: 10,
         borderRadius: 20,
         marginRight: 10,
         borderWidth: 1,
-        borderColor: '#475569',
+        borderColor: theme.colors.surfaceHighlight,
     },
     chipText: {
-        color: '#e2e8f0', // slate-200
+        color: '#e2e8f0',
         fontSize: 14,
         fontWeight: '500',
     },

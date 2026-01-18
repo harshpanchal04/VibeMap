@@ -4,6 +4,7 @@ import { Provider, useSelector } from 'react-redux';
 import { store, RootState } from '../src/features/store';
 import { useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
+import { theme } from '../src/theme';
 import '../global.css';
 
 function AuthGuard() {
@@ -30,7 +31,7 @@ function AuthGuard() {
     }, [user, segments, rootNavigationState?.key]);
 
     return (
-        <Stack screenOptions={{ headerShown: false }}>
+        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.colors.background } }}>
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="map/[id]" />
             <Stack.Screen name="auth" />
