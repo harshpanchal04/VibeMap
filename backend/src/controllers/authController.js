@@ -14,6 +14,7 @@ const generateToken = (id) => {
 // @access  Public
 const registerUser = async (req, res) => {
     const { name, email, password } = req.body;
+    console.info(`[AUTH] Register request for email: ${email}`);
 
     if (!name || !email || !password) {
         return res.status(400).json({ message: 'Please add all fields' });
@@ -23,6 +24,7 @@ const registerUser = async (req, res) => {
     const userExists = await User.findOne({ email });
 
     if (userExists) {
+        console.warn(`[AUTH] Registration failed: User already exists (${email})`);
         return res.status(400).json({ message: 'User already exists' });
     }
 
@@ -38,6 +40,7 @@ const registerUser = async (req, res) => {
     });
 
     if (user) {
+        console.info(`[AUTH] Registration successful for user: ${user._id}`);
         res.status(201).json({
             _id: user.id,
             name: user.name,
@@ -45,6 +48,7 @@ const registerUser = async (req, res) => {
             token: generateToken(user.id),
         });
     } else {
+        console.error('[AUTH] Registration failed: Invalid user data');
         res.status(400).json({ message: 'Invalid user data' });
     }
 };
@@ -54,11 +58,13 @@ const registerUser = async (req, res) => {
 // @access  Public
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
+    console.info(`[AUTH] Login request for email: ${email}`);
 
     // Check for user email
     const user = await User.findOne({ email });
 
     if (user && (await bcrypt.compare(password, user.passwordHash))) {
+        console.info(`[AUTH] Login successful for user: ${user._id}`);
         res.json({
             _id: user.id,
             name: user.name,
@@ -66,6 +72,7 @@ const loginUser = async (req, res) => {
             token: generateToken(user.id),
         });
     } else {
+        console.error(`[AUTH] Login failed: Invalid credentials for ${email}`);
         res.status(400).json({ message: 'Invalid credentials' });
     }
 };
