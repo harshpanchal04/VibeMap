@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VibeMap</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        /* Custom Dark Mode Tile Filter */
+        .leaflet-tile {
+            filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        // Initialize map centered on Bangalore (default)
+        const map = L.map('map', {
+            zoomControl: false, // Cleaner UI
+            attributionControl: false
+        }).setView([12.9716, 77.5946], 13);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19
+        }).addTo(map);
+
+        // Store markers in a layer group
+        let markersLayer = L.layerGroup().addTo(map);
+
+        // Global function to update markers
+        window.updateMarkers = function (stopsJson) {
+            try {
+                const stops = JSON.parse(stopsJson);
+
+                // Clear existing markers
+                markersLayer.clearLayers();
+
+                if (!stops || stops.length === 0) {
+                    return;
+                }
+
+                const bounds = [];
+
+                // Add markers for each stop
+                stops.forEach((stop, index) => {
+                    const { lat, lng } = stop.coordinates;
+
+                    // Custom Icon (Simple Circle for now, can be enhanced)
+                    const marker = L.marker([lat, lng]).addTo(markersLayer);
+
+                    // Add popup with stop info
+                    marker.bindPopup(`
+                        <div style="font-family: sans-serif; color: #000; padding: 5px;">
+                            <h3 style="margin: 0 0 5px 0; font-size: 16px;">${stop.name}</h3>
+                            <p style="margin: 0; font-size: 12px; color: #555;">${stop.category}</p>
+                        </div>
+                    `);
+
+                    bounds.push([lat, lng]);
+                });
+
+                // Fit map to show all markers
+                if (bounds.length > 0) {
+                    map.fitBounds(bounds, { padding: [50, 50] });
+                }
+            } catch (error) {
+                console.error('Error updating markers:', error);
+            }
+        };
+
+        // Global function to zoom to a specific location
+        window.zoomToLocation = function (lat, lng) {
+            try {
+                map.setView([lat, lng], 16, {
+                    animate: true,
+                    duration: 1.0
+                });
+            } catch (error) {
+                console.error('Error zooming to location:', error);
+            }
+        };
+
+        // Notify React Native that the map is ready
+        if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage('MAP_READY');
+        }
+    </script>
+</body>
+
+</html>
