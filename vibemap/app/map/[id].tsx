@@ -1,18 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, ActivityIndicator } from 'react-native';
 import WebView from 'react-native-webview';
-import { useSelector } from 'react-redux';
-import { useRouter } from 'expo-router';
-import { RootState } from '../../src/features/store';
+import { useSelector, useDispatch } from 'react-redux';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { RootState, AppDispatch } from '../../src/features/store';
 import { useMapBridge } from '../../src/features/map/useMapBridge';
 import ScreenWrapper from '../../src/components/ScreenWrapper';
 import { processPayment } from '../../src/features/payment/stripe';
 import { VibeCard } from '../../src/components/VibeCard';
+import { setTrip, fetchUserHistory } from '../../src/features/chat/tripSlice';
 
 const { height } = Dimensions.get('window');
 
 export default function MapScreen() {
-    const { itinerary } = useSelector((state: RootState) => state.trip);
+    const { id: idParam } = useLocalSearchParams();
+    const id = Array.isArray(idParam) ? idParam[0] : idParam;
+    const { itinerary, history, status } = useSelector((state: RootState) => state.trip);
+    const dispatch = useDispatch<AppDispatch>();
+
+    // Restored hooks
     const { webviewRef, zoomToLocation, updateMarkers } = useMapBridge();
     const [isUnlocked, setIsUnlocked] = useState(false);
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -44,12 +50,52 @@ export default function MapScreen() {
         }
     };
 
-    if (!itinerary) {
+    // Effect to set the correct itinerary if we navigated from history
+    useEffect(() => {
+        if (!id) return;
+
+        // If we already have the correct itinerary loaded, do nothing
+        if (itinerary && itinerary._id === id) return;
+
+        // Try to find in history
+        const foundTrip = history.find(t => t._id === id);
+        if (foundTrip) {
+            dispatch(setTrip(foundTrip));
+        } else if (history.length === 0 && status !== 'loading') {
+            // If history is empty and we haven't found it, fetch history
+            dispatch(fetchUserHistory());
+        }
+    }, [id, itinerary, history, status, dispatch]);
+
+    // Loading State
+    const foundInHistory = history.find(t => t._id === id);
+    const isSwitchingTrip = foundInHistory && (!itinerary || itinerary._id !== id);
+    const isFetchingHistory = history.length === 0 && !itinerary && status !== 'failed';
+
+    const isLoading = status === 'loading' || isSwitchingTrip || isFetchingHistory;
+
+    if (isLoading) {
         return (
             <ScreenWrapper>
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color="#3b82f6" />
-                    <Text style={styles.loadingText}>Loading itinerary...</Text>
+                    <Text style={styles.loadingText}>
+                        {isSwitchingTrip ? "Preparing map..." : "Loading history..."}
+                    </Text>
+                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                        <Text style={styles.backButtonText}>Go Back</Text>
+                    </TouchableOpacity>
+                </View>
+            </ScreenWrapper>
+        );
+    }
+
+    // Not Found State
+    if (!itinerary || itinerary._id !== id) {
+        return (
+            <ScreenWrapper>
+                <View style={styles.loadingContainer}>
+                    <Text style={[styles.loadingText, { color: '#ef4444' }]}>Trip not found.</Text>
                     <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
                         <Text style={styles.backButtonText}>Go Back</Text>
                     </TouchableOpacity>

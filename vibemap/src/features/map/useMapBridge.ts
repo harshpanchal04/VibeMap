@@ -13,10 +13,26 @@ export const useMapBridge = () => {
 
     const updateMarkers = (stopsJson: string) => {
         if (webviewRef.current) {
-            // Escape the JSON string properly for JavaScript injection
-            const escapedJson = stopsJson.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-            const script = `window.updateMarkers('${escapedJson}'); true;`;
-            webviewRef.current.injectJavaScript(script);
+            try {
+                // Safety Check: Parse and ensure coordinates are numbers
+                const stops = JSON.parse(stopsJson);
+                const safeStops = stops.map((stop: any) => ({
+                    ...stop,
+                    coordinates: {
+                        lat: parseFloat(stop.coordinates.lat),
+                        lng: parseFloat(stop.coordinates.lng)
+                    }
+                }));
+
+                const safeJson = JSON.stringify(safeStops);
+
+                // Escape the JSON string properly for JavaScript injection
+                const escapedJson = safeJson.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                const script = `window.updateMarkers('${escapedJson}'); true;`;
+                webviewRef.current.injectJavaScript(script);
+            } catch (error) {
+                console.error("Error processing map markers:", error);
+            }
         }
     };
 

@@ -1,29 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'expo-router';
 import { RootState, AppDispatch } from '../../src/features/store';
 import { generateItinerary, resetTrip } from '../../src/features/chat/tripSlice';
 import ScreenWrapper from '../../src/components/ScreenWrapper';
 
+const TRENDING_VIBES = [
+    '☕ Late Night Brew',
+    '🍜 Spicy Street Food',
+    '💻 Quiet Work Spot',
+    '🍸 Rooftop Views',
+    '🎨 Art Gallery Hopping',
+    '🧘 Peaceful Park Walk'
+];
+
 export default function ChatScreen() {
     const [prompt, setPrompt] = useState('');
     const dispatch = useDispatch<AppDispatch>();
     const router = useRouter();
-    const { status, error } = useSelector((state: RootState) => state.trip);
+    const { status, error, itinerary } = useSelector((state: RootState) => state.trip);
 
     useEffect(() => {
-        if (status === 'success') {
-            router.push('/map/1');
-            // Optional: reset trip status here if you want to allow back navigation without auto-forwarding
-            // dispatch(resetTrip()); 
+        if (status === 'success' && itinerary) {
+            // Navigate to the map screen with the generated trip's ID
+            router.push(`/map/${itinerary._id}`);
         }
-    }, [status, router]);
+    }, [status, itinerary, router]);
 
     const handleSubmit = () => {
         if (prompt.trim()) {
             dispatch(generateItinerary(prompt));
         }
+    };
+
+    const handleChipPress = (vibe: string) => {
+        // Remove emoji for cleaner prompt if desired, or keep it.
+        // Keeping it adds character.
+        setPrompt(vibe);
     };
 
     return (
@@ -45,6 +59,27 @@ export default function ChatScreen() {
                         numberOfLines={3}
                     />
 
+                    {/* Trending Vibes Chips */}
+                    <View style={styles.chipsContainer}>
+                        <Text style={styles.chipsLabel}>Trending Vibes</Text>
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={styles.chipsScrollContent}
+                        >
+                            {TRENDING_VIBES.map((vibe, index) => (
+                                <TouchableOpacity
+                                    key={index}
+                                    style={styles.chip}
+                                    onPress={() => handleChipPress(vibe)}
+                                    activeOpacity={0.7}
+                                >
+                                    <Text style={styles.chipText}>{vibe}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+
                     {error && (
                         <Text style={styles.errorText}>Error: {error}</Text>
                     )}
@@ -55,7 +90,10 @@ export default function ChatScreen() {
                         disabled={status === 'loading'}
                     >
                         {status === 'loading' ? (
-                            <ActivityIndicator color="#ffffff" />
+                            <View style={styles.loadingRow}>
+                                <ActivityIndicator color="#ffffff" style={{ marginRight: 10 }} />
+                                <Text style={styles.buttonText}>Waking up AI...</Text>
+                            </View>
                         ) : (
                             <Text style={styles.buttonText}>Generate Itinerary</Text>
                         )}
@@ -114,5 +152,40 @@ const styles = StyleSheet.create({
     errorText: {
         color: '#ef4444', // red-500
         marginBottom: 15,
+    },
+    // Chips Styling
+    chipsContainer: {
+        width: '100%',
+        marginBottom: 25,
+    },
+    chipsLabel: {
+        color: '#94a3b8',
+        fontSize: 12,
+        fontWeight: '600',
+        marginBottom: 10,
+        marginLeft: 4,
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+    },
+    chipsScrollContent: {
+        paddingRight: 20,
+    },
+    chip: {
+        backgroundColor: '#334155', // slate-700
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20,
+        marginRight: 10,
+        borderWidth: 1,
+        borderColor: '#475569',
+    },
+    chipText: {
+        color: '#e2e8f0', // slate-200
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    loadingRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
     }
 });

@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Use localhost for emulator (10.0.2.2 for Android) or your machine's IP for physical device
 // It's best to put this in .env as EXPO_PUBLIC_API_URL
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://vibemap-zbp8.onrender.com/api';
 
 const api = axios.create({
     baseURL: API_URL,
