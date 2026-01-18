@@ -6,7 +6,7 @@ const Vibe = require('../models/Vibe');
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "dummy_key");
 
 const model = genAI.getGenerativeModel({
-    model: "gemini-flash-lite-latest",
+    model: "gemini-1.5-flash-latest",
     generationConfig: {
         responseMimeType: "application/json",
     },
